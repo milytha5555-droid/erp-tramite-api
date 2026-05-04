@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#188a61">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ERP Trámite">
+    <title>ERP Trámite</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">ERP</p>
+          <h1>Trámite</h1>
+        </div>
+        <div class="actions">
+          <span id="status" class="status">Conectando...</span>
+          <button id="addRow" type="button">Agregar fila</button>
+        </div>
+      </header>
+
+      <section class="tabs" aria-label="Pestañas">
+        <button class="tab active" type="button">Trámite</button>
+      </section>
+
+      <section class="sheet" aria-label="Cuadro de trámite">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Cantidad</th>
+                <th>Producto</th>
+                <th># de pedido</th>
+                <th># de rastreo</th>
+                <th>F. de compra</th>
+                <th>F. de llegada</th>
+                <th>Envío</th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <template id="rowTemplate">
+      <tr>
+        <td><input data-field="cantidad" inputmode="numeric" aria-label="Cantidad"></td>
+        <td><input data-field="producto" aria-label="Producto"></td>
+        <td><input data-field="pedido" aria-label="Numero de pedido"></td>
+        <td><input data-field="rastreo" aria-label="Numero de rastreo"></td>
+        <td><input data-field="fechaCompra" placeholder="1/26/2026" aria-label="Fecha de compra"></td>
+        <td><input data-field="fechaLlegada" placeholder="1/26/2026" aria-label="Fecha de llegada"></td>
+        <td><input data-field="envio" aria-label="Envio"></td>
+        <td><input data-field="estado" aria-label="Estado"></td>
+        <td><button class="delete" type="button" title="Eliminar fila">Eliminar</button></td>
+      </tr>
+    </template>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
