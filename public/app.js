@@ -7,8 +7,7 @@ const passwordEl = document.querySelector("#password");
 const rowsEl = document.querySelector("#rows");
 const template = document.querySelector("#rowTemplate");
 const restoreBackupButton = document.querySelector("#restoreBackup");
-const editProductsButton = document.querySelector("#editProducts");
-const editStatusesButton = document.querySelector("#editStatuses");
+const editSelectedButton = document.querySelector("#editSelected");
 const addRowButton = document.querySelector("#addRow");
 const deleteSelectedButton = document.querySelector("#deleteSelected");
 const logoutButton = document.querySelector("#logout");
@@ -26,8 +25,7 @@ let refreshTimer = null;
 let isLoading = false;
 let currentUser = null;
 let selectedIds = new Set();
-let productsEditable = false;
-let statusesEditable = false;
+let editingIds = new Set();
 let usingLocalBackup = false;
 
 function setStatus(text) {
@@ -124,20 +122,14 @@ function readRowFromTr(tr) {
 
 function updateSelectionControls() {
   const count = selectedIds.size;
+  const selectedEditing = [...selectedIds].filter((id) => editingIds.has(id)).length;
+  editSelectedButton.disabled = count === 0;
+  editSelectedButton.textContent = count > 0 && selectedEditing === count ? `Bloquear (${count})` : count > 0 ? `Editar (${count})` : "Editar";
   deleteSelectedButton.disabled = count === 0;
   deleteSelectedButton.textContent = count > 0 ? `Eliminar (${count})` : "Eliminar";
   selectAllEl.checked = rows.length > 0 && selectedIds.size === rows.length;
   selectAllEl.indeterminate = selectedIds.size > 0 && selectedIds.size < rows.length;
   updateBackupControls();
-}
-
-function updateProductEditMode() {
-  editProductsButton.textContent = productsEditable ? "Bloquear productos" : "Editar productos";
-  document.querySelectorAll('[data-field="producto"]').forEach((input) => {
-    input.readOnly = !productsEditable;
-    input.title = productsEditable ? "Producto editable" : "Producto bloqueado";
-    input.closest("td")?.classList.toggle("locked-column", !productsEditable);
-  });
 }
 
 function normalizeStatus(value) {
@@ -159,21 +151,16 @@ function normalizeStatus(value) {
 function applyStatusStyle(select) {
   const status = normalizeStatus(select.value);
   select.value = status;
-  select.closest("td")?.classList.remove("status-entregado", "status-cancelado", "status-rechazado", "status-camino");
-  if (status === "ENTREGADO") select.closest("td")?.classList.add("status-entregado");
-  if (status === "CANCELADO") select.closest("td")?.classList.add("status-cancelado");
-  if (status === "RECHAZADO") select.closest("td")?.classList.add("status-rechazado");
-  if (status === "EN CAMINO") select.closest("td")?.classList.add("status-camino");
+  applyRowStatusStyle(select.closest("tr"), status);
 }
 
-function updateStatusEditMode() {
-  editStatusesButton.textContent = statusesEditable ? "Bloquear estados" : "Editar estados";
-  document.querySelectorAll('[data-field="estado"]').forEach((select) => {
-    select.disabled = !statusesEditable;
-    select.title = statusesEditable ? "Estado editable" : "Estado bloqueado";
-    select.closest("td")?.classList.toggle("locked-column", !statusesEditable);
-    applyStatusStyle(select);
-  });
+function applyRowStatusStyle(tr, status) {
+  if (!tr) return;
+  tr.classList.remove("row-entregado", "row-cancelado", "row-rechazado", "row-camino");
+  if (status === "ENTREGADO") tr.classList.add("row-entregado");
+  if (status === "CANCELADO") tr.classList.add("row-cancelado");
+  if (status === "RECHAZADO") tr.classList.add("row-rechazado");
+  if (status === "EN CAMINO") tr.classList.add("row-camino");
 }
 
 function scheduleSave(tr) {
@@ -310,8 +297,6 @@ async function handleExcelPaste(event, tr, field) {
       values.forEach((value, colOffset) => {
         const nextField = fields[startField + colOffset];
         if (!nextField) return;
-        if (nextField === "producto" && !productsEditable) return;
-        if (nextField === "estado" && !statusesEditable) return;
         nextRow[nextField] = normalizePastedValue(nextField, value);
       });
 
@@ -332,6 +317,7 @@ async function handleExcelPaste(event, tr, field) {
 function render() {
   rowsEl.innerHTML = "";
   selectedIds = new Set([...selectedIds].filter((id) => rows.some((row) => row.id === id)));
+  editingIds = new Set([...editingIds].filter((id) => rows.some((row) => row.id === id)));
 
   if (rows.length === 0) {
     const tr = document.createElement("tr");
@@ -349,6 +335,8 @@ function render() {
     const fragment = template.content.cloneNode(true);
     const tr = fragment.querySelector("tr");
     tr.dataset.id = row.id;
+    const isEditing = editingIds.has(row.id);
+    applyRowStatusStyle(tr, normalizeStatus(row.estado));
 
     const checkbox = tr.querySelector(".row-select");
     checkbox.checked = selectedIds.has(row.id);
@@ -365,6 +353,7 @@ function render() {
         input.querySelector('[data-range="from"]').value = dates.from;
         input.querySelector('[data-range="to"]').value = dates.to;
         input.querySelectorAll("input").forEach((dateInput) => {
+          dateInput.disabled = !isEditing;
           dateInput.addEventListener("input", () => scheduleSave(tr));
           dateInput.addEventListener("paste", (event) => handleExcelPaste(event, tr, field));
         });
@@ -372,6 +361,10 @@ function render() {
       }
 
       input.value = field === "estado" ? normalizeStatus(row[field]) : row[field] || "";
+      input.readOnly = input.tagName !== "SELECT" && !isEditing;
+      input.disabled = input.tagName === "SELECT" && !isEditing;
+      input.closest("td")?.classList.toggle("locked-column", !isEditing);
+      input.title = isEditing ? "Editable" : "Selecciona la fila y presiona Editar";
       const saveEvent = input.tagName === "SELECT" ? "change" : "input";
       input.addEventListener(saveEvent, () => {
         if (field === "estado") applyStatusStyle(input);
@@ -385,8 +378,6 @@ function render() {
   }
 
   updateSelectionControls();
-  updateProductEditMode();
-  updateStatusEditMode();
 }
 
 function hasActiveEdit() {
@@ -516,6 +507,15 @@ selectAllEl.addEventListener("change", () => {
   render();
 });
 
+editSelectedButton.addEventListener("click", () => {
+  const ids = [...selectedIds];
+  if (ids.length === 0) return;
+  const allEditing = ids.every((id) => editingIds.has(id));
+  if (allEditing) ids.forEach((id) => editingIds.delete(id));
+  else ids.forEach((id) => editingIds.add(id));
+  render();
+});
+
 restoreBackupButton.addEventListener("click", async () => {
   const backup = getLocalBackup();
   if (backup.length === 0) return;
@@ -548,6 +548,7 @@ deleteSelectedButton.addEventListener("click", async () => {
     await Promise.all(ids.map((id) => api(`/api/tramites/${encodeURIComponent(id)}`, { method: "DELETE" })));
     rows = rows.filter((row) => !selectedIds.has(row.id));
     selectedIds.clear();
+    editingIds.clear();
     saveLocalBackup(rows);
     render();
     setStatus("Guardado");

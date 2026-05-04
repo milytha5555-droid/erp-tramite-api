@@ -326,6 +326,11 @@ td select:focus {
 
 td.locked-cell,
 td.locked-column {
+  background: inherit;
+}
+
+tr:not(.row-entregado):not(.row-cancelado):not(.row-rechazado):not(.row-camino) td.locked-cell,
+tr:not(.row-entregado):not(.row-cancelado):not(.row-rechazado):not(.row-camino) td.locked-column {
   background: #eef3f0;
 }
 
@@ -349,31 +354,27 @@ td.locked-column select {
   opacity: 1;
 }
 
-td.status-entregado,
-td.status-entregado.locked-cell,
-td.status-entregado.locked-column {
+tr.row-entregado td:not(.select-col) {
   background: #9be0aa;
 }
 
-td.status-cancelado,
-td.status-rechazado,
-td.status-cancelado.locked-cell,
-td.status-rechazado.locked-cell,
-td.status-cancelado.locked-column,
-td.status-rechazado.locked-column {
+tr.row-cancelado td:not(.select-col),
+tr.row-rechazado td:not(.select-col) {
   background: #ffc4c4;
 }
 
-td.status-camino,
-td.status-camino.locked-cell,
-td.status-camino.locked-column {
+tr.row-camino td:not(.select-col) {
   background: #fff56b;
 }
 
-td.status-entregado select,
-td.status-cancelado select,
-td.status-rechazado select,
-td.status-camino select {
+tr.row-entregado input,
+tr.row-entregado select,
+tr.row-cancelado input,
+tr.row-cancelado select,
+tr.row-rechazado input,
+tr.row-rechazado select,
+tr.row-camino input,
+tr.row-camino select {
   color: #14201b;
   font-weight: 800;
 }
