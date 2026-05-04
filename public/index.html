@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#188a61">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ERP g&f">
+    <title>Amazon Pedidos</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <section id="loginView" class="login-view" hidden>
+      <form id="loginForm" class="login-panel">
+        <div class="brand-mark">G&F</div>
+        <p class="eyebrow">ERP g&f</p>
+        <h1>Amazon Pedidos</h1>
+        <label>
+          Usuario
+          <input id="username" autocomplete="username" value="admin" required>
+        </label>
+        <label>
+          Clave
+          <input id="password" type="password" autocomplete="current-password" value="admin123" required>
+        </label>
+        <button type="submit">Ingresar</button>
+        <p id="loginStatus" class="login-status"></p>
+      </form>
+    </section>
+
+    <main id="appView" class="app" hidden>
+      <header class="topbar">
+        <div class="title-group">
+          <span class="brand-pill">ERP g&f</span>
+          <div>
+            <p class="eyebrow">Modulo</p>
+            <h1>Amazon Pedidos</h1>
+          </div>
+        </div>
+        <div class="actions">
+          <span id="userLabel" class="user-label"></span>
+          <span id="status" class="status">Conectando...</span>
+          <button id="addRow" type="button">Agregar fila</button>
+          <button id="deleteSelected" class="danger-action" type="button" disabled>Eliminar</button>
+          <button id="logout" class="secondary" type="button">Salir</button>
+        </div>
+      </header>
+
+      <section class="tabs" aria-label="Pestanas">
+        <button class="tab active" type="button">Amazon Pedidos</button>
+      </section>
+
+      <section class="sheet" aria-label="Cuadro de pedidos">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="select-col"><input id="selectAll" type="checkbox" aria-label="Seleccionar todos"></th>
+                <th>Cantidad</th>
+                <th>Producto</th>
+                <th># de pedido</th>
+                <th># de rastreo</th>
+                <th>F. de compra</th>
+                <th>F. de llegada</th>
+                <th>Envio</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <template id="rowTemplate">
+      <tr>
+        <td class="select-col"><input class="row-select" type="checkbox" aria-label="Seleccionar fila"></td>
+        <td><input data-field="cantidad" inputmode="numeric" aria-label="Cantidad"></td>
+        <td><input data-field="producto" aria-label="Producto"></td>
+        <td><input data-field="pedido" aria-label="Numero de pedido"></td>
+        <td><input data-field="rastreo" aria-label="Numero de rastreo"></td>
+        <td><input data-field="fechaCompra" placeholder="1/26/2026" aria-label="Fecha de compra"></td>
+        <td><input data-field="fechaLlegada" placeholder="1/26/2026" aria-label="Fecha de llegada"></td>
+        <td><input data-field="envio" aria-label="Envio"></td>
+        <td><input data-field="estado" aria-label="Estado"></td>
+      </tr>
+    </template>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
