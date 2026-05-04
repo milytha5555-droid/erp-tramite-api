@@ -86,7 +86,13 @@
         <td><input data-field="pedido" inputmode="text" autocomplete="off" aria-label="Numero de pedido"></td>
         <td><input data-field="rastreo" inputmode="text" autocomplete="off" aria-label="Numero de rastreo"></td>
         <td><input data-field="fechaCompra" type="date" aria-label="Fecha de compra"></td>
-        <td><input data-field="fechaLlegada" type="date" aria-label="Fecha de llegada"></td>
+        <td>
+          <div class="date-range" data-field="fechaLlegada">
+            <input data-range="from" type="date" aria-label="Fecha de llegada desde">
+            <span>a</span>
+            <input data-range="to" type="date" aria-label="Fecha de llegada hasta">
+          </div>
+        </td>
         <td><input data-field="envio" aria-label="Envio"></td>
         <td>
           <select data-field="estado" aria-label="Estado" disabled>

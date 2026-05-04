@@ -110,7 +110,14 @@ async function api(path, options = {}) {
 function readRowFromTr(tr) {
   const row = { id: tr.dataset.id };
   for (const field of fields) {
-    row[field] = tr.querySelector(`[data-field="${field}"]`).value;
+    if (field === "fechaLlegada") {
+      const range = tr.querySelector('[data-field="fechaLlegada"]');
+      const from = range.querySelector('[data-range="from"]').value;
+      const to = range.querySelector('[data-range="to"]').value;
+      row[field] = from && to ? `${from} / ${to}` : from || to || "";
+    } else {
+      row[field] = tr.querySelector(`[data-field="${field}"]`).value;
+    }
   }
   return row;
 }
@@ -129,7 +136,7 @@ function updateProductEditMode() {
   document.querySelectorAll('[data-field="producto"]').forEach((input) => {
     input.readOnly = !productsEditable;
     input.title = productsEditable ? "Producto editable" : "Producto bloqueado";
-    input.closest("td")?.classList.toggle("locked-cell", !productsEditable);
+    input.closest("td")?.classList.toggle("locked-column", !productsEditable);
   });
 }
 
@@ -164,7 +171,7 @@ function updateStatusEditMode() {
   document.querySelectorAll('[data-field="estado"]').forEach((select) => {
     select.disabled = !statusesEditable;
     select.title = statusesEditable ? "Estado editable" : "Estado bloqueado";
-    select.closest("td")?.classList.toggle("locked-cell", !statusesEditable);
+    select.closest("td")?.classList.toggle("locked-column", !statusesEditable);
     applyStatusStyle(select);
   });
 }
@@ -243,6 +250,16 @@ function normalizePastedDate(value) {
   }
 
   return raw;
+}
+
+function splitDateRange(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return { from: "", to: "" };
+  const parts = raw.split(/\s*(?:\/| hasta | a )\s*/i).filter(Boolean);
+  return {
+    from: normalizePastedDate(parts[0] || ""),
+    to: normalizePastedDate(parts[1] || "")
+  };
 }
 
 function normalizePastedValue(field, value) {
@@ -343,6 +360,17 @@ function render() {
 
     for (const field of fields) {
       const input = tr.querySelector(`[data-field="${field}"]`);
+      if (field === "fechaLlegada") {
+        const dates = splitDateRange(row[field]);
+        input.querySelector('[data-range="from"]').value = dates.from;
+        input.querySelector('[data-range="to"]').value = dates.to;
+        input.querySelectorAll("input").forEach((dateInput) => {
+          dateInput.addEventListener("input", () => scheduleSave(tr));
+          dateInput.addEventListener("paste", (event) => handleExcelPaste(event, tr, field));
+        });
+        continue;
+      }
+
       input.value = field === "estado" ? normalizeStatus(row[field]) : row[field] || "";
       const saveEvent = input.tagName === "SELECT" ? "change" : "input";
       input.addEventListener(saveEvent, () => {

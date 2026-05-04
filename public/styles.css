@@ -278,7 +278,7 @@ td:nth-child(3) {
 
 td:nth-child(6),
 td:nth-child(7) {
-  width: 142px;
+  width: 170px;
 }
 
 td input,
@@ -295,6 +295,25 @@ td select {
   width: 100%;
 }
 
+.date-range {
+  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr);
+  height: 44px;
+}
+
+.date-range span {
+  color: #435149;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.date-range input {
+  font-size: 12px;
+  padding: 5px 2px;
+}
+
 td:nth-child(3) input {
   text-align: left;
 }
@@ -305,40 +324,49 @@ td select:focus {
   outline-color: var(--green);
 }
 
-td.locked-cell {
+td.locked-cell,
+td.locked-column {
   background: #eef3f0;
 }
 
-td.locked-cell input {
+td.locked-cell input,
+td.locked-column input {
   color: #34443d;
   cursor: default;
 }
 
 td.locked-cell input:focus,
-td.locked-cell select:focus {
+td.locked-cell select:focus,
+td.locked-column input:focus,
+td.locked-column select:focus {
   background: #eef3f0;
   outline-color: transparent;
 }
 
-td.locked-cell select {
+td.locked-cell select,
+td.locked-column select {
   cursor: default;
   opacity: 1;
 }
 
 td.status-entregado,
-td.status-entregado.locked-cell {
+td.status-entregado.locked-cell,
+td.status-entregado.locked-column {
   background: #9be0aa;
 }
 
 td.status-cancelado,
 td.status-rechazado,
 td.status-cancelado.locked-cell,
-td.status-rechazado.locked-cell {
+td.status-rechazado.locked-cell,
+td.status-cancelado.locked-column,
+td.status-rechazado.locked-column {
   background: #ffc4c4;
 }
 
 td.status-camino,
-td.status-camino.locked-cell {
+td.status-camino.locked-cell,
+td.status-camino.locked-column {
   background: #fff56b;
 }
 
